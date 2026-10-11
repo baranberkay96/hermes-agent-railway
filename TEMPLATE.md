@@ -36,7 +36,7 @@ Upgrade: change the image tag to a newer `vX.Y.Z` from https://github.com/NousRe
                  │
    ┌─────────────┴──────────────────────────────────────────────┐
    │ Hermes (nousresearch/hermes-agent:v0.21.6)                  │
-   │  PID 1: s6-overlay /init (via entrypoint-dispatch.sh)       │
+   │  railway-start.sh (Railway's init is PID 1, not s6)        │
    │   ├─ gateway run   (supervised: agent, cron, kanban)        │
    │   ├─ dashboard     (supervised: web UI + REST, :9119)       │
    │   └─ on demand: agent-browser + bundled headless Chromium   │
@@ -55,7 +55,7 @@ One service. The gateway needs no inbound port; the public domain only serves th
 | Setting | Value |
 |---|---|
 | Source | Docker image `nousresearch/hermes-agent:v0.21.6` |
-| Start command | `/opt/hermes/docker/entrypoint-dispatch.sh gateway run` |
+| Source | `services/hermes` — official image plus `railway-start.sh` as ENTRYPOINT, CMD `gateway run` |
 | Healthcheck | `/api/health` (upstream's minimal, unauthenticated liveness probe on the dashboard), timeout 300 s (first boot seeds skills and runs state.db migrations) |
 | Public domain | yes, target port **9119** (dashboard) |
 | TCP proxy | none |
@@ -63,7 +63,7 @@ One service. The gateway needs no inbound port; the public domain only serves th
 | Restart policy | ON_FAILURE, 10 retries |
 | Replicas | 1 (must stay 1: upstream forbids two gateways on one data directory) |
 
-Why this start command: Railway's start command replaces the image ENTRYPOINT (exec form). Calling the image's own dispatcher keeps s6-overlay `/init` as PID 1, so the stage2 bootstrap (volume ownership, config seeding, skills sync) runs, the gateway and dashboard are supervised, and processes drop to the unprivileged `hermes` user. A bare `hermes gateway run` start command would skip all of that, and upstream refuses to start the gateway as root.
+Why the wrapper: Railway runs containers under its own init (`podman-init` is PID 1), so the image's dispatcher takes its non-PID-1 path and skips s6-overlay. That path still bootstraps and runs the gateway, but no supervised services start — the dashboard never listened and the first deploy test failed its `/api/health` check. `railway-start.sh` repeats upstream's fallback (stage2 bootstrap, then `main-wrapper.sh`, which drops to the `hermes` user) and runs `hermes dashboard` in a restart loop as `hermes` next to it. Verified locally with `docker run --init` (non-PID-1): `/api/health` 200 after ~10 s, `/` redirects to the login page.
 
 Variables (all have descriptions in `template.json`):
 

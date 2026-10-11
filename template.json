@@ -21,9 +21,10 @@
     "Hermes": {
       "icon": "https://raw.githubusercontent.com/NousResearch/hermes-agent/main/website/static/img/apple-touch-icon.png",
       "source": {
-        "image": "nousresearch/hermes-agent:v0.21.6"
+        "repo": "baranberkay96/hermes-agent-railway",
+        "rootDirectory": "/services/hermes"
       },
-      "startCommand": "/opt/hermes/docker/entrypoint-dispatch.sh gateway run",
+      "startCommand": null,
       "preDeployCommand": null,
       "healthcheckPath": "/api/health",
       "healthcheckTimeout": 300,
