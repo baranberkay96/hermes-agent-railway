@@ -5,7 +5,7 @@
 | Field | Value |
 |---|---|
 | Name | **Hermes Agent v0.21 Always-On (Telegram, Discord, Slack)** (LISTINGS.md name with version label "v0.21" inserted after the software name: pinned release `v0.21.6` is a 0.x release, so major.minor, and Hermes tags with a `v`) |
-| Description | Self-improving AI agent running 24/7 with persistent memory and a headless browser. (83 chars, unchanged) |
+| Description | Self-improving AI agent running 24/7 with persistent memory and a browser. (83 chars, unchanged) |
 | Category | AI/ML |
 | Tags | hermes-agent, ai-agent, nous-research, telegram, discord, slack, llm, automation |
 

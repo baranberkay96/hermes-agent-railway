@@ -1,6 +1,6 @@
 {
   "name": "Hermes Agent v0.21 Always-On (Telegram, Discord, Slack)",
-  "description": "Self-improving AI agent running 24/7 with persistent memory and a headless browser.",
+  "description": "Self-improving AI agent running 24/7 with persistent memory and a browser.",
   "category": "AI/ML",
   "tags": [
     "hermes-agent",
