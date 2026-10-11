@@ -1,5 +1,7 @@
 # Deploy and Host Hermes Agent with Railway
 
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/hermes-agent-v021-always-on-telegram-dis)
+
 Run Hermes Agent, the open-source self-improving agent from Nous Research, as an always-on assistant on Railway. It answers you on Telegram, Discord or Slack, keeps its memory, skills and schedules on a persistent volume, browses the web with a built-in headless Chromium and ships with the official web dashboard.
 
 ## About Hosting Hermes Agent
