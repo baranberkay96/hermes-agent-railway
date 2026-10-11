@@ -1,0 +1,150 @@
+{
+  "name": "Hermes Agent v0.21 Always-On (Telegram, Discord, Slack)",
+  "description": "Self-improving AI agent running 24/7 with persistent memory and a headless browser.",
+  "category": "AI/ML",
+  "tags": [
+    "hermes-agent",
+    "ai-agent",
+    "nous-research",
+    "telegram",
+    "discord",
+    "slack",
+    "llm",
+    "automation"
+  ],
+  "upstream": {
+    "repo": "NousResearch/hermes-agent",
+    "version": "v0.21.6",
+    "checked": "2026-10-10"
+  },
+  "services": {
+    "Hermes": {
+      "icon": "https://raw.githubusercontent.com/NousResearch/hermes-agent/main/website/static/img/apple-touch-icon.png",
+      "source": {
+        "image": "nousresearch/hermes-agent:v0.21.6"
+      },
+      "startCommand": "/opt/hermes/docker/entrypoint-dispatch.sh gateway run",
+      "preDeployCommand": null,
+      "healthcheckPath": "/api/health",
+      "healthcheckTimeout": 300,
+      "restartPolicyType": "ON_FAILURE",
+      "restartPolicyMaxRetries": 10,
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": true,
+      "targetPort": 9119,
+      "tcpProxy": null,
+      "volume": {
+        "mountPath": "/opt/data"
+      },
+      "variables": {
+        "OPENROUTER_API_KEY": {
+          "defaultValue": "",
+          "description": "REQUIRED. OpenRouter API key (openrouter.ai/keys): one key for Claude, GPT, Gemini, Hermes and hundreds of other models.",
+          "required": true
+        },
+        "TELEGRAM_BOT_TOKEN": {
+          "defaultValue": "",
+          "description": "Telegram bot token from @BotFather. Set at least one of Telegram, Discord or Slack (or connect one later on the dashboard's Channels page).",
+          "required": false
+        },
+        "TELEGRAM_ALLOWED_USERS": {
+          "defaultValue": "",
+          "description": "Comma-separated Telegram user IDs allowed to talk to the agent. Empty = deny by default; approve people via DM pairing on the dashboard.",
+          "required": false
+        },
+        "DISCORD_BOT_TOKEN": {
+          "defaultValue": "",
+          "description": "Discord bot token (Developer Portal > Bot). Enable the Message Content intent for the bot.",
+          "required": false
+        },
+        "DISCORD_ALLOWED_USERS": {
+          "defaultValue": "",
+          "description": "Comma-separated Discord user IDs allowed to talk to the agent. Empty = deny by default plus DM pairing.",
+          "required": false
+        },
+        "SLACK_BOT_TOKEN": {
+          "defaultValue": "",
+          "description": "Slack bot token (xoxb-...). Slack also needs SLACK_APP_TOKEN (Socket Mode).",
+          "required": false
+        },
+        "SLACK_APP_TOKEN": {
+          "defaultValue": "",
+          "description": "Slack app-level token (xapp-...) with connections:write, used for Socket Mode.",
+          "required": false
+        },
+        "SLACK_ALLOWED_USERS": {
+          "defaultValue": "",
+          "description": "Comma-separated Slack member IDs allowed to talk to the agent. Empty = deny by default plus DM pairing.",
+          "required": false
+        },
+        "ANTHROPIC_API_KEY": {
+          "defaultValue": "",
+          "description": "Optional direct Anthropic key, if you prefer it over OpenRouter.",
+          "required": false
+        },
+        "OPENAI_API_KEY": {
+          "defaultValue": "",
+          "description": "Optional direct OpenAI key (also used for voice tools when set).",
+          "required": false
+        },
+        "HERMES_INFERENCE_MODEL": {
+          "defaultValue": "",
+          "description": "Optional process-wide model override (e.g. anthropic/claude-sonnet-4.6). Leave empty to pick the model in the dashboard; when set it wins over the dashboard choice.",
+          "required": false
+        },
+        "HERMES_DASHBOARD": {
+          "defaultValue": "1",
+          "description": "Runs the official Hermes web dashboard next to the gateway (s6-supervised, port 9119).",
+          "required": false
+        },
+        "HERMES_DASHBOARD_HOST": {
+          "defaultValue": "0.0.0.0",
+          "description": "Dashboard bind address. A non-loopback bind always enforces the dashboard login.",
+          "required": false
+        },
+        "HERMES_DASHBOARD_PORT": {
+          "defaultValue": "9119",
+          "description": "Dashboard port; the public domain targets it.",
+          "required": false
+        },
+        "HERMES_DASHBOARD_PUBLIC_URL": {
+          "defaultValue": "https://${{RAILWAY_PUBLIC_DOMAIN}}",
+          "description": "Public URL of the dashboard (Host/Origin allow-list and OAuth callbacks). Update it when you add a custom domain.",
+          "required": false
+        },
+        "HERMES_DASHBOARD_BASIC_AUTH_USERNAME": {
+          "defaultValue": "admin",
+          "description": "Dashboard login username (bundled username/password provider).",
+          "required": false
+        },
+        "HERMES_DASHBOARD_BASIC_AUTH_PASSWORD": {
+          "defaultValue": "${{secret(32)}}",
+          "description": "Dashboard login password, generated at deploy. Read it from this variable after deploying.",
+          "required": false
+        },
+        "HERMES_DASHBOARD_BASIC_AUTH_SECRET": {
+          "defaultValue": "${{secret(64)}}",
+          "description": "Stable signing key for dashboard sessions so logins survive restarts and redeploys.",
+          "required": false
+        },
+        "HERMES_DASHBOARD_OAUTH_CLIENT_ID": {
+          "defaultValue": "",
+          "description": "Optional Nous Portal OAuth client id (agent:...). Upstream recommends OAuth over username/password for internet-facing dashboards.",
+          "required": false
+        },
+        "AGENT_BROWSER_ARGS": {
+          "defaultValue": "--no-sandbox,--disable-dev-shm-usage",
+          "description": "Container-safe launch flags for the bundled headless Chromium (no user-namespace sandbox, no reliance on a large /dev/shm). Setting this replaces Hermes' auto-detected flags.",
+          "required": false
+        },
+        "RAILWAY_DEPLOYMENT_DRAINING_SECONDS": {
+          "defaultValue": "30",
+          "description": "Time Hermes gets to finish turns and checkpoint SQLite before the old container is stopped on redeploy.",
+          "required": false
+        }
+      }
+    }
+  },
+  "buckets": []
+}
