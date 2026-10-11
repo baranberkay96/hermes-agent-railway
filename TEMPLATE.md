@@ -144,3 +144,7 @@ Minimum plan: **Hobby**. Trial (1 GB per service) can boot the gateway, but the 
 - Upstream labels the username/password provider "trusted network only" and recommends Nous Portal OAuth for internet-facing dashboards. The template uses a 32-character generated password and HTTPS. Users who need stronger protection should register OAuth (`hermes dashboard register` via `railway ssh`, then set `HERMES_DASHBOARD_OAUTH_CLIENT_ID`) or remove the public domain when they are not using the dashboard.
 - Railway's edge proxy is not loopback, so Hermes does not trust its `X-Forwarded-Proto`. Session cookies are therefore set without the `Secure` flag (still only sent over HTTPS by the browser). Login rate limiting counts per proxy IP. `dashboard.trusted_proxies` takes exact IPs/CIDRs only, and Railway's edge range is not documented.
 - PID 1 behaviour of the start-command form (dispatcher sees `$$ = 1`) is inferred from Railway docs ("start command overrides ENTRYPOINT in exec form") and from the market leader, which also runs the dispatcher. If a deploy ever logs "container entrypoint is not PID 1", the gateway still runs but the dashboard is not started.
+
+## Deploy test findings (2026-10-11)
+
+After the PID-1 wrapper fix the dashboard listened on 9119, but the healthcheck still failed: Railway probes the port in `PORT`, which was unset. Fix: `PORT=9119`.

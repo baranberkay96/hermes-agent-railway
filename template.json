@@ -143,6 +143,11 @@
           "defaultValue": "30",
           "description": "Time Hermes gets to finish turns and checkpoint SQLite before the old container is stopped on redeploy.",
           "required": false
+        },
+        "PORT": {
+          "defaultValue": "9119",
+          "description": "Port Railway's healthcheck and public domain use; must match HERMES_DASHBOARD_PORT.",
+          "required": false
         }
       }
     }
