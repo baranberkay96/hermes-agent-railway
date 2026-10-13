@@ -1,6 +1,6 @@
 {
   "name": "Hermes Agent v0.21 Always-On (Telegram, Discord, Slack)",
-  "description": "Self-improving AI agent running 24/7 with persistent memory and a browser.",
+  "description": "Self-improving AI agent running 24/7 with web chat UI, memory and browser",
   "category": "AI/ML",
   "tags": [
     "hermes-agent",
@@ -10,12 +10,19 @@
     "discord",
     "slack",
     "llm",
-    "automation"
+    "automation",
+    "web-ui",
+    "chat-ui"
   ],
   "upstream": {
     "repo": "NousResearch/hermes-agent",
-    "version": "v0.21.6",
-    "checked": "2026-10-10"
+    "version": "v0.21.7",
+    "checked": "2026-10-13",
+    "webui": {
+      "repo": "nesquena/hermes-webui",
+      "version": "v0.52.113",
+      "checked": "2026-10-13"
+    }
   },
   "services": {
     "Hermes": {
@@ -134,6 +141,31 @@
           "description": "Optional Nous Portal OAuth client id (agent:...). Upstream recommends OAuth over username/password for internet-facing dashboards.",
           "required": false
         },
+        "HERMES_WEBUI": {
+          "defaultValue": "1",
+          "description": "Runs Hermes WebUI (browser and phone chat) inside this service on HERMES_WEBUI_PORT; open it via the Hermes WebUI service URL.",
+          "required": false
+        },
+        "HERMES_WEBUI_PASSWORD": {
+          "defaultValue": "${{secret(32)}}",
+          "description": "WebUI login password, generated at deploy. The WebUI never starts without it. Read it from this variable after deploying.",
+          "required": false
+        },
+        "HERMES_WEBUI_HOST": {
+          "defaultValue": "::",
+          "description": "WebUI bind address. \"::\" is dual-stack so the Hermes WebUI proxy reaches it over the private network.",
+          "required": false
+        },
+        "HERMES_WEBUI_PORT": {
+          "defaultValue": "8787",
+          "description": "WebUI port on the private network; the Hermes WebUI service proxies to it.",
+          "required": false
+        },
+        "HERMES_WEBUI_SECURE": {
+          "defaultValue": "1",
+          "description": "Marks WebUI session cookies Secure (Railway serves it over HTTPS only).",
+          "required": false
+        },
         "AGENT_BROWSER_ARGS": {
           "defaultValue": "--no-sandbox,--disable-dev-shm-usage",
           "description": "Container-safe launch flags for the bundled headless Chromium (no user-namespace sandbox, no reliance on a large /dev/shm). Setting this replaces Hermes' auto-detected flags.",
@@ -147,6 +179,37 @@
         "PORT": {
           "defaultValue": "9119",
           "description": "Port Railway's healthcheck and public domain use; must match HERMES_DASHBOARD_PORT.",
+          "required": false
+        }
+      }
+    },
+    "Hermes WebUI": {
+      "icon": "https://raw.githubusercontent.com/nesquena/hermes-webui/v0.52.113/static/favicon-512.png",
+      "source": {
+        "repo": "baranberkay96/hermes-agent-railway",
+        "rootDirectory": "/services/webui-proxy"
+      },
+      "startCommand": null,
+      "preDeployCommand": null,
+      "healthcheckPath": "/proxy-health",
+      "healthcheckTimeout": 120,
+      "restartPolicyType": "ON_FAILURE",
+      "restartPolicyMaxRetries": 10,
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": true,
+      "targetPort": 8080,
+      "tcpProxy": null,
+      "volume": null,
+      "variables": {
+        "HERMES_WEBUI_UPSTREAM": {
+          "defaultValue": "${{Hermes.RAILWAY_PRIVATE_DOMAIN}}:${{Hermes.HERMES_WEBUI_PORT}}",
+          "description": "Private-network address of the WebUI, which runs inside the Hermes service (it needs Hermes' volume).",
+          "required": false
+        },
+        "PORT": {
+          "defaultValue": "8080",
+          "description": "Port Caddy listens on; Railway's healthcheck and public domain use it.",
           "required": false
         }
       }

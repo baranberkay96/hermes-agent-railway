@@ -1,0 +1,34 @@
+# Public HTTPS entry for Hermes WebUI. Railway's edge terminates TLS and sends
+# plain HTTP here; Caddy forwards it over the private network to the WebUI,
+# which runs inside the Hermes service (it needs Hermes' volume, and a Railway
+# volume can only be mounted by one service). Login is enforced by the WebUI.
+{
+	admin off
+	auto_https off
+}
+
+:{$PORT:8080} {
+	# Answered by Caddy itself, so this service turns healthy even while the
+	# Hermes service is still building or booting.
+	handle /proxy-health {
+		respond "ok" 200
+	}
+
+	handle {
+		# Host is passed through unchanged: the WebUI's CSRF check compares the
+		# browser Origin with it.
+		reverse_proxy {$HERMES_WEBUI_UPSTREAM} {
+			# Chat replies stream as server-sent events; never buffer them.
+			flush_interval -1
+			transport http {
+				dial_timeout 5s
+			}
+		}
+	}
+
+	handle_errors 502 503 504 {
+		header Content-Type "text/plain; charset=utf-8"
+		header Retry-After 30
+		respond "Hermes WebUI is not reachable yet. It starts with the Hermes service (about a minute after a deploy) and only when HERMES_WEBUI=1 and HERMES_WEBUI_PASSWORD are set there. Check the Hermes service logs." 503
+	}
+}
